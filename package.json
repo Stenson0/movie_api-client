@@ -15,5 +15,13 @@
     "url": "https://github.com/Stenson0/movie_api-client/issues"
   },
   "homepage": "https://github.com/Stenson0/movie_api-client#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@parcel/transformer-sass": "^2.13.3",
+    "process": "^0.11.10"
+  }
 }
