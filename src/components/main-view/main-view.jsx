@@ -12,7 +12,7 @@ export const MainView = () => {
             console.log(data);
             setMovies(data);
         });
-  })
+  }, []);
 
   const [selectedMovie, setSelectedMovie] = useState(null);
 
