@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import React, {useState, useEffect } from "react";
 
 export const MovieCard = ({ movie, onMovieClick }) => {
     return (
@@ -7,7 +8,7 @@ export const MovieCard = ({ movie, onMovieClick }) => {
         onMovieClick(movie);
       }}
       >
-        {movie.title}
+        {movie.Title}
       </div>
     );
   };
