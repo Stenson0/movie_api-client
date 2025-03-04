@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { MovieCard } from "../movie-card/movie-card";
 import { MovieView } from "../movie-view/movie-view";
 import { LoginView } from "../login-view/login-view";
+import { SignupView } from "../signup-view/signup-view";
 
 export const MainView = () => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -21,22 +22,34 @@ export const MainView = () => {
         .then(movies => {
             setMovies(movies)})
         }, [token]);
+
+        const onBackClick = () => {
+            setSelectedMovie(null);
+        }
+    
+        const handleLogout = () => {
+            setUser(null);
+            setToken(null);
+            localStorage.removeItem("user");
+            localStorage.removeItem("token");
+        }
             
         if (!user) {
             return (
-            <LoginView
-                onLoggedIn={(user, token) => {
-                setUser(user);
-                setToken(token);
-                localStorage.setItem("user", JSON.stringify(user));
-                localStorage.setItem("token", token);
-                }}
-            />
+                <>
+                    <LoginView
+                        onLoggedIn={(user, token) => {
+                        setUser(user);
+                        setToken(token);
+                        localStorage.setItem("user", JSON.stringify(user));
+                        localStorage.setItem("token", token);
+                        }}
+                    />
+                    or 
+                    <SignupView />
+                </>
             );
         }
-    }
-
-  const [selectedMovie, setSelectedMovie] = useState(null);
 
   if (selectedMovie) {
     return (
@@ -49,19 +62,19 @@ export const MainView = () => {
   }
 
   return (
-    <div>
+    <>
       <div>
-        {movies.map((movie) => (
-          <MovieCard
-          key={movie.id}
-          movie={movie}
-          onMovieClick={(newSelectedMovie) => {
-            setSelectedMovie(newSelectedMovie);
-          }}
-          />
-        ))}
-      </div>
-      <button onClick={() => { setUser(null); setToken(null); localStorage.clear(); }}>Logout</button>
-    </div>
+            {movies.map((movie) => (
+                <MovieCard
+                key={movie.id}
+                movie={movie}
+                onMovieClick={(newSelectedMovie) => {
+                    setSelectedMovie(newSelectedMovie);
+                }}
+            />
+            ))}
+        </div>
+        <button onClick={() => { setUser(null); setToken(null); localStorage.clear(); }}>Logout</button>
+    </>
   );
 };
