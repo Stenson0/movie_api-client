@@ -12,7 +12,7 @@ export const LoginView = () => {
             Password: password      
         };
 
-    fetch("https://mymovie-api-cc1cba8fc12b.herokuapp.com/", {
+    fetch("https://mymovie-api-cc1cba8fc12b.herokuapp.com/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
