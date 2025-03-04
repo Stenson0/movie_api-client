@@ -32,6 +32,11 @@ export const LoginView = () => {
           alert("Something went wrong");
         });
 
+        if(logout){
+            setUsernameLogin("");
+            setPasswordLogin("");
+        }
+
     return (
     <form onSubmit={handleSubmit}>
         <label>
