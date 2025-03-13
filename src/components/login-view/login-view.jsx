@@ -1,6 +1,6 @@
 import {useState} from 'react';
 
-export const LoginView = () => {
+export const LoginView = ({onLoggedIn}) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
@@ -36,6 +36,7 @@ export const LoginView = () => {
             setUsernameLogin("");
             setPasswordLogin("");
         }
+    };
 
     return (
     <form onSubmit={handleSubmit}>
@@ -60,4 +61,4 @@ export const LoginView = () => {
         <button type="submit">Submit</button>
     </form>
   );
-}};
+};
