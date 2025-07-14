@@ -1,4 +1,8 @@
 import { useState, useEffect } from "react";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import Button from "react-bootstrap/Button";
+
 import { MovieCard } from "../movie-card/movie-card";
 import { MovieView } from "../movie-view/movie-view";
 import { LoginView } from "../login-view/login-view";
@@ -25,6 +29,10 @@ export const MainView = () => {
 
         const onBackClick = () => {
             setSelectedMovie(null);
+        }
+
+        const handleMovieClick = (newSelectedMovie) => {
+            setSelectedMovie(newSelectedMovie);
         }
     
         const handleLogout = () => {
@@ -53,7 +61,14 @@ export const MainView = () => {
 
   if (selectedMovie) {
     return (
-      <MovieView movie={selectedMovie} onBackClick={() => setSelectedMovie(null)} />
+      <Row className="justify-content-md-center">
+        <MovieView
+          movie={selectedMovie}
+          allMovies={movies}
+          onBackClick={() => setSelectedMovie(null)}
+          onMovieClick={handleMovieClick}    
+        />
+      </Row>
     );
   }
 
@@ -62,19 +77,25 @@ export const MainView = () => {
   }
 
   return (
-    <>
-      <div>
+    <div className="main-view">
+        <Row>
+            <Col>
+                <Button variant="primary" onClick={handleLogout}>
+                    Logout
+                </Button>
+            </Col>
+        </Row>
+
+        <Row>
             {movies.map((movie) => (
-                <MovieCard
-                key={movie.id}
-                movie={movie}
-                onMovieClick={(newSelectedMovie) => {
-                    setSelectedMovie(newSelectedMovie);
-                }}
-            />
+                <Col key={movie._id} md={3}>
+                    <MovieCard
+                        movie={movie}
+                        onMovieClick={() => setSelectedMovie(movie)}
+                    />
+                </Col>
             ))}
-        </div>
-        <button onClick={() => { setUser(null); setToken(null); localStorage.clear(); }}>Logout</button>
-    </>
+        </Row>
+    </div>
   );
 };
