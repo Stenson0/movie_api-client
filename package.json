@@ -17,9 +17,11 @@
   "homepage": "https://github.com/Stenson0/movie_api-client#readme",
   "description": "",
   "dependencies": {
+    "bootstrap": "^5.3.7",
+    "prop-types": "^15.8.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "prop-types": "^15.8.1"
+    "react-bootstrap": "^2.10.10",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@parcel/transformer-sass": "^2.13.3",
