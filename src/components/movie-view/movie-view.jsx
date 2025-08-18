@@ -1,41 +1,48 @@
-import React, {useState, useEffect } from "react";
+import React from "react";
+import { useParams } from "react-router-dom";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 
 import "./movie-view.scss";
 
-import Col from "react-bootstrap/Col";
-import Row from "react-bootstrap/Row";
-import Card from "react-bootstrap/Card";
-import Button from "react-bootstrap/Button";
-import Figure from "react-bootstrap/Figure";
+export const MovieView = ({ movies }) => {
+    const { movieTitle } = useParams();
 
-import {MovieCard} from "../movie-card/movie-card";
+    const movie = movies.find(
+        (m) =>
+        m.Title.toLowerCase() === decodeURIComponent(movieTitle).toLowerCase()
+    );
 
-export const MovieView = ({ movie, onBackClick }) => {
+    if (!movie) {
+        return <div>Movie not found</div>;
+    }
+
     return (
         <div>
-
-            <div>
-                <img src={movie.image}/>
-            </div>
-
             <div>
                 <span>Title:</span>
-                <span>{movie.title}</span>
+                <span>{movie.Title}</span>
             </div>
 
             <div>
                 <span>Director:</span>
-                <span>{movie.Director}</span>
+                <span>{movie.Director.Name}</span>
             </div>
 
-            <button
-                onClick={onBackClick}
-                className="back-button"
-                style={{cursor: "pointer"}}
-            >
+            <div>
+                <span>Genre:</span>
+                <span>{movie.Genre.Name}</span>
+            </div>
+
+            <Link to="/">
+                <button className="back-button" style={{ cursor: "pointer" }}>
                 Back
-            </button>
+                </button>
+            </Link>
         </div>
-    )
-}        
+    );
+};
+
+MovieView.propTypes = {
+    movies: PropTypes.array.isRequired,
+};

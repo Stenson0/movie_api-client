@@ -6,15 +6,14 @@ import { Link } from "react-router-dom";
 
 export const MovieCard = ({ movie }) => {
     return (
-        <Card className="movie-card">
-                <Card.Img variant="top" src={movie.image}/>
+        <Link to={'/movies/${movie.Title}'}>
+            <Card className="movie-card"> 
+                <Card.Img variant="top" src={movie.image} />
                 <Card.Body>
-                <Card.Title>{movie.Title}</Card.Title>
-                <Link to={`/movies/${movie._id}`}>
-                    <MovieCard movie={movie} />
-                </Link>
+                    <Card.Title>{movie.Title}</Card.Title>
                 </Card.Body>
-        </Card>
+            </Card>
+        </Link>
     );
   };
 

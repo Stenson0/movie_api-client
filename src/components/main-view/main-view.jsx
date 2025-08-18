@@ -9,6 +9,7 @@ import { MovieView } from "../movie-view/movie-view";
 import { LoginView } from "../login-view/login-view";
 import { SignupView } from "../signup-view/signup-view";
 import { NavigationBar } from "../navigation-bar/navigation-bar";
+import { ProfileView } from "../profile-view/profile-view";
 
 export const MainView = () => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -79,7 +80,7 @@ export const MainView = () => {
             />
 
             <Route
-                path="/movies/:movieId"
+                path="/movies/:movieTitle"
                 element={
                 !user ? (
                     <Navigate to="/login" replace />
@@ -111,6 +112,24 @@ export const MainView = () => {
                 )
                 }
             />
+
+            <Route
+                path="/profile"
+                element={
+                !user ? (
+                    <ProfileView
+                        user={user}
+                        movie={movie}
+                        favorites={favorites}
+                        onLogout={handleLogout}
+                        onRemove={toggleFavorite}
+                        onProfileUpdate={handleProfileUpdate}
+                    />
+                ) : (
+                    <Navigate to="/login" replace />
+                )}                
+            />
+
             </Routes>
         </Row>
     </BrowserRouter>
