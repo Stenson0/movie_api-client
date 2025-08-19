@@ -76,8 +76,8 @@ export const ProfileView = ({ user, token, onLogout, movies }) => {
 
     if (!userInfo) return <div>Loading...</div>;
 
-    const favoriteMovies = movies.filter(m =>
-        userInfo.FavoriteMovies && userInfo.FavoriteMovies.includes(m._id)
+    favoriteMovies = movies.filter(m => 
+        user.FavoriteMovies.includes(m._id)
     );
 
     return (
@@ -131,23 +131,12 @@ export const ProfileView = ({ user, token, onLogout, movies }) => {
             <hr />
             <h5 className="mt-4">Favorite Movies</h5>
             <Row>
-            {favoriteMovies.length === 0 && <Col>No favorites yet.</Col>}
-            {favoriteMovies.map(movie => (
-                <Col key={movie._id} xs={12} md={6} lg={4} className="mb-3">
-                <MovieCard
-                    movie={movie}
-                    onMovieClick={() => {}}
-                />
-                <Button
-                    variant="outline-danger"
-                    size="sm"
-                    className="mt-2"
-                    onClick={() => handleRemoveFavorite(movie._id)}
-                >
-                    Remove from Favorites
-                </Button>
-                </Col>
-            ))}
+                <h4>Favorite Movies</h4>
+                {favoriteMovies?.map((movie) => (
+                    <Col sm={6} md={5} lg={4} xl={3} key={movie._id} className='my-3'>
+                    <MovieCard movie={movie} />
+                    </Col>
+                ))}
             </Row>
         </Card.Body>
         </Card>
