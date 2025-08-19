@@ -116,14 +116,12 @@ export const MainView = () => {
             <Route
                 path="/profile"
                 element={
-                !user ? (
+                user ? (
                     <ProfileView
                         user={user}
-                        movie={movie}
-                        favorites={favorites}
+                        token={token}
+                        movies={movies}
                         onLogout={handleLogout}
-                        onRemove={toggleFavorite}
-                        onProfileUpdate={handleProfileUpdate}
                     />
                 ) : (
                     <Navigate to="/login" replace />
