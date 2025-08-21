@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
 import { BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
 import { Link } from "react-router-dom"
 
@@ -17,6 +18,7 @@ export const MainView = () => {
     const [user, setUser] = useState(storedUser || null);
     const [token, setToken] = useState(storedToken || null);
     const [movies, setMovies] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         if (!token) return;
@@ -32,14 +34,36 @@ export const MainView = () => {
         });
     }, [token]);
 
-        const handleLogout = () => {
-            setUser(null);
-            setToken(null);
-            localStorage.removeItem("user");
-            localStorage.removeItem("token");
-        };
-            
+    const handleLogout = () => {
+        setUser(null);
+        setToken(null);
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+    };
     
+    // Filter movies based on search term
+    const filteredMovies = movies.filter(movie => 
+        movie.Title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (movie.Director && movie.Director.Name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (movie.Genre && movie.Genre.Name.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+    // Check if a movie is in user's favorites
+    const isFavoriteMovie = (movieId) => {
+        return user && user.FavoriteMovies && user.FavoriteMovies.includes(movieId);
+    };
+
+    // Update user data after adding/removing favorites
+    const handleFavoriteChange = () => {
+        fetch(`https://mymovie-api-cc1cba8fc12b.herokuapp.com/users/${user.Username}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+        .then(response => response.json())
+        .then(userData => {
+            setUser(userData);
+            localStorage.setItem("user", JSON.stringify(userData));
+        });
+    };
 
     return (
     <BrowserRouter>
@@ -103,11 +127,32 @@ export const MainView = () => {
                     <Col>The list is empty!</Col>
                 ) : (
                     <>
-                    {movies.map((movie) => (
+                    <Col xs={12} className="mb-4">
+                      <Form.Group>
+                        <Form.Control
+                          type="text"
+                          placeholder="Search by title, director, or genre"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                      </Form.Group>
+                    </Col>
+                    
+                    {filteredMovies.length === 0 ? (
+                      <Col>No movies found</Col>
+                    ) : (
+                      filteredMovies.map((movie) => (
                         <Col className="mb-4" key={movie._id} md={3}>
-                        <MovieCard user={user} token={token} movie={movie} />
+                          <MovieCard 
+                            user={user} 
+                            token={token} 
+                            movie={movie} 
+                            isFavorite={isFavoriteMovie(movie._id)}
+                            onFavoriteChange={handleFavoriteChange}
+                          />
                         </Col>
-                    ))}
+                      ))
+                    )}
                     </>
                 )
                 }
