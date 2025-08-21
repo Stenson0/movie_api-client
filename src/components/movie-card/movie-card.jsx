@@ -35,10 +35,21 @@ export const MovieCard = ({
       });
   };
 
+  // Use ImagePath (which is likely what your API returns) or fallback to a placeholder
+  const imageUrl = movie.ImagePath || "https://via.placeholder.com/300x450?text=No+Image";
+
   return (
     <Card className="movie-card">
       <Link to={`/movies/${movie.Title}`}>
-        <Card.Img variant="top" src={movie.image} />
+        <Card.Img 
+          variant="top" 
+          src={imageUrl} 
+          alt={movie.Title}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "https://via.placeholder.com/300x450?text=Image+Not+Found";
+          }} 
+        />
       </Link>
       <Card.Body>
         <Card.Title>{movie.Title}</Card.Title>
@@ -68,14 +79,15 @@ export const MovieCard = ({
   );
 };
 
+// Fix PropTypes to match your actual API response structure
 MovieCard.propTypes = {
   movie: PropTypes.shape({
     _id: PropTypes.string.isRequired,
     Title: PropTypes.string.isRequired,
-    image: PropTypes.string.isRequired,
-    director: PropTypes.shape({
-      name: PropTypes.string.isRequired,
-    }).isRequired,
+    ImagePath: PropTypes.string, // Changed from image to ImagePath
+    Director: PropTypes.shape({
+      Name: PropTypes.string.isRequired,
+    }),
   }).isRequired,
   user: PropTypes.object,
   token: PropTypes.string,
