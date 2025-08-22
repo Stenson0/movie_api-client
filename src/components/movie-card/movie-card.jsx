@@ -35,6 +35,9 @@ export const MovieCard = ({
       });
   };
 
+  // Define the image path correctly
+  const imagePath = movie.ImagePath || "https://via.placeholder.com/300x450?text=No+Image";
+
   return (
     <Card className="movie-card h-100">
       <Link to={`/movies/${movie.Title}`}>
@@ -44,7 +47,7 @@ export const MovieCard = ({
           alt={movie.Title}
           style={{ height: "300px", objectFit: "cover" }}
           onError={(e) => {
-            console.log("Image failed to load:", imageUrl);
+            console.log("Image failed to load:", imagePath);
             e.target.onerror = null;
             e.target.src = "https://via.placeholder.com/300x450?text=Image+Not+Found";
           }} 
