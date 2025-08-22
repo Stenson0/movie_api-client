@@ -35,19 +35,12 @@ export const MovieCard = ({
       });
   };
 
-  // Use ImagePath (which is likely what your API returns) or fallback to a placeholder
-  const imageUrl = movie.ImagePath 
-    ? (movie.ImagePath.startsWith('http') 
-       ? movie.ImagePath 
-       : `${API_URL}${movie.ImagePath}`)
-    : "https://via.placeholder.com/300x450?text=No+Image";
-
   return (
     <Card className="movie-card h-100">
       <Link to={`/movies/${movie.Title}`}>
         <Card.Img 
           variant="top" 
-          src={imageUrl} 
+          src={imagePath} 
           alt={movie.Title}
           style={{ height: "300px", objectFit: "cover" }}
           onError={(e) => {
