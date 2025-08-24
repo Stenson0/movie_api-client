@@ -45,7 +45,7 @@ export const MovieCard = ({
           variant="top" 
           src={imagePath} 
           alt={movie.Title}
-          style={{ height: "300px", width: "100%", objectFit: "cover" }}
+          style={{ height: "300px", width: "168px"}}
           onError={(e) => {
             console.log("Image failed to load:", imagePath);
             e.target.onerror = null;
