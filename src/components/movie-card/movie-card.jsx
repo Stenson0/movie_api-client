@@ -23,7 +23,7 @@ export const MovieCard = ({
     }
     
     fetch(`${API_URL}/users/${user.Username}/movies/${movieId}`, {
-      method: "PATCH",
+      method: "POST",
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -41,7 +41,7 @@ export const MovieCard = ({
       return;
     }
     
-    fetch(`${API_URL}/users/${user.Username}/${movieId}`, {
+    fetch(`${API_URL}/users/${user.Username}/movies/${movieId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` }
     })
