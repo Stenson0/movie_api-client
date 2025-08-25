@@ -14,11 +14,17 @@ export const MovieCard = ({
   onFavoriteChange
 }) => {
   const handleAddFavorite = () => {
+    console.log("Full movie object:", movie);
+    console.log("Available movie properties:", Object.keys(movie));
+    console.log("movie._id:", movie._id);
+    console.log("movie.id:", movie.id);
+    
     // Use either _id or id, whichever is available
     const movieId = movie._id || movie.id;
     
     if (!movieId) {
       console.error("No movie ID found:", movie);
+      console.error("Available properties:", Object.keys(movie));
       return;
     }
     

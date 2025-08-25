@@ -28,6 +28,9 @@ export const MainView = () => {
         })
         .then(response => response.json())
         .then(movies => {
+            console.log("API Response - Movies:", movies);
+            console.log("First movie object:", movies[0]);
+            console.log("First movie keys:", movies[0] ? Object.keys(movies[0]) : "No movies");
             setMovies(movies)})
         .catch(error => {
             console.error("Error fetching movies:", error);
