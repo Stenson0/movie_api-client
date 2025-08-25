@@ -28,9 +28,6 @@ export const MainView = () => {
         })
         .then(response => response.json())
         .then(movies => {
-            console.log("API Response - Movies:", movies);
-            console.log("First movie object:", movies[0]);
-            console.log("First movie keys:", movies[0] ? Object.keys(movies[0]) : "No movies");
             setMovies(movies)})
         .catch(error => {
             console.error("Error fetching movies:", error);
@@ -53,7 +50,7 @@ export const MainView = () => {
 
     // Check if a movie is in user's favorites
     const isFavoriteMovie = (movie) => {
-        const movieId = movie._id || movie.id;
+        const movieId = movie.Title;
         return user && user.FavoriteMovies && user.FavoriteMovies.includes(movieId);
     };
 
@@ -146,7 +143,7 @@ export const MainView = () => {
                       <Col>No movies found</Col>
                     ) : (
                       filteredMovies.map((movie) => (
-                        <Col className="mb-4" key={movie._id || movie.id} md={3}>
+                        <Col className="mb-4" key={movie.Title} md={3}>
                           <MovieCard 
                             user={user} 
                             token={token} 

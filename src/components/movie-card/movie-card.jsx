@@ -14,21 +14,15 @@ export const MovieCard = ({
   onFavoriteChange
 }) => {
   const handleAddFavorite = () => {
-    console.log("Full movie object:", movie);
-    console.log("Available movie properties:", Object.keys(movie));
-    console.log("movie._id:", movie._id);
-    console.log("movie.id:", movie.id);
-    
-    // Use either _id or id, whichever is available
-    const movieId = movie._id || movie.id;
+    // Use movie title as identifier since there's no _id or id field
+    const movieId = movie.Title;
     
     if (!movieId) {
-      console.error("No movie ID found:", movie);
-      console.error("Available properties:", Object.keys(movie));
+      console.error("No movie title found:", movie);
       return;
     }
     
-    fetch(`${API_URL}/users/${user.Username}/movies/${movieId}`, {
+    fetch(`${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movieId)}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -42,15 +36,15 @@ export const MovieCard = ({
   };
 
   const handleRemoveFavorite = () => {
-    // Use either _id or id, whichever is available
-    const movieId = movie._id || movie.id;
+    // Use movie title as identifier since there's no _id or id field
+    const movieId = movie.Title;
     
     if (!movieId) {
-      console.error("No movie ID found:", movie);
+      console.error("No movie title found:", movie);
       return;
     }
     
-    fetch(`${API_URL}/users/${user.Username}/movies/${movieId}`, {
+    fetch(`${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movieId)}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -111,8 +105,6 @@ export const MovieCard = ({
 // Fix PropTypes to match your actual API response structure
 MovieCard.propTypes = {
   movie: PropTypes.shape({
-    _id: PropTypes.string,
-    id: PropTypes.string,
     Title: PropTypes.string.isRequired,
     ImagePath: PropTypes.string, // Changed from image to ImagePath
     Director: PropTypes.shape({

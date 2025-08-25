@@ -74,7 +74,7 @@ export const ProfileView = ({ user, token, onLogout, movies }) => {
 
     // Get favorite movies
     const favoriteMovies = movies.filter(movie => {
-        const movieId = movie._id || movie.id;
+        const movieId = movie.Title;
         return userInfo && userInfo.FavoriteMovies && userInfo.FavoriteMovies.includes(movieId);
     });
 
@@ -144,7 +144,7 @@ export const ProfileView = ({ user, token, onLogout, movies }) => {
                                 <Col>You haven't added any movies to your favorites yet.</Col>
                             ) : (
                                 favoriteMovies.map(movie => (
-                                    <Col md={4} key={movie._id || movie.id} className="mb-3">
+                                    <Col md={4} key={movie.Title} className="mb-3">
                                         <MovieCard
                                             movie={movie}
                                             user={user}
