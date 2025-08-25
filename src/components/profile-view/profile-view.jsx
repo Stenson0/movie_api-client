@@ -5,32 +5,24 @@ import { MovieCard } from "../movie-card/movie-card";
 const API_URL = "https://mymovie-api-cc1cba8fc12b.herokuapp.com";
 
 export const ProfileView = ({ user, token, onLogout, movies }) => {
-    const [userInfo, setUserInfo] = useState(null);
+    const [userInfo, setUserInfo] = useState(user);
     const [form, setForm] = useState({
-        Username: "",
+        Username: user.Username,
         Password: "",
-        Email: "",
-        Birthday: ""
+        Email: user.Email,
+        Birthday: user.Birthday ? user.Birthday.slice(0, 10) : ""
     });
 
+    // Update userInfo when user prop changes (from main view)
     useEffect(() => {
-        fetch(`${API_URL}/users/${user.Username}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        .then(res => res.json())
-        .then(userData => {
-            setUserInfo(userData);
-            setForm({
-                Username: userData.Username,
-                Password: "",
-                Email: userData.Email,
-                Birthday: userData.Birthday ? userData.Birthday.slice(0, 10) : ""
-            });
-        })
-        .catch(err => {
-            console.error("Error fetching user data:", err);
+        setUserInfo(user);
+        setForm({
+            Username: user.Username,
+            Password: "",
+            Email: user.Email,
+            Birthday: user.Birthday ? user.Birthday.slice(0, 10) : ""
         });
-    }, [user, token]);
+    }, [user]);
 
     const handleChange = e => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -151,14 +143,6 @@ export const ProfileView = ({ user, token, onLogout, movies }) => {
                                             token={token}
                                             isFavorite={true}
                                             onFavoriteChange={() => {
-                                                // Refresh user data to get updated favorites
-                                                fetch(`${API_URL}/users/${user.Username}`, {
-                                                    headers: { Authorization: `Bearer ${token}` }
-                                                })
-                                                .then(res => res.json())
-                                                .then(userData => {
-                                                    setUserInfo(userData);
-                                                });
                                             }}
                                         />
                                     </Col>
