@@ -26,10 +26,13 @@ export const MovieCard = ({
       method: "POST",
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => res.json())
-      .then(() => {
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`Failed to add favorite (${res.status})`);
+        // Some endpoints return 204 No Content; safely consume if present
+        try { await res.json(); } catch (_) {}
         if (onFavoriteChange) onFavoriteChange();
-      });
+      })
+      .catch(err => console.error("Add favorite error:", err));
   };
 
   const handleRemoveFavorite = () => {
@@ -45,10 +48,12 @@ export const MovieCard = ({
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => res.json())
-      .then(() => {
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`Failed to remove favorite (${res.status})`);
+        try { await res.json(); } catch (_) {}
         if (onFavoriteChange) onFavoriteChange();
-      });
+      })
+      .catch(err => console.error("Remove favorite error:", err));
   };
 
   // Define the image path correctly
