@@ -14,51 +14,88 @@ export const MovieCard = ({
   onFavoriteChange
 }) => {
   const handleAddFavorite = () => {
-    // Use movie title as identifier since there's no _id or id field
-    const movieId = movie.Title;
+    console.log("Full movie object:", movie);
+    console.log("Available properties:", Object.keys(movie));
     
-    if (!movieId) {
-      console.error("No movie title found:", movie);
-      return;
-    }
-    
-    // Try different endpoint patterns
-    const endpoints = [
-      `${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movieId)}`,
-      `${API_URL}/users/${user.Username}/movies?title=${encodeURIComponent(movieId)}`,
-      `${API_URL}/users/${user.Username}/favorites/${encodeURIComponent(movieId)}`,
-      `${API_URL}/users/${user.Username}/favorites?title=${encodeURIComponent(movieId)}`
+    // Try different approaches
+    const approaches = [
+      // Approach 1: Send movie title in request body
+      {
+        url: `${API_URL}/users/${user.Username}/movies`,
+        method: "POST",
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ movieTitle: movie.Title })
+      },
+      // Approach 2: Send movie title in request body with different field name
+      {
+        url: `${API_URL}/users/${user.Username}/movies`,
+        method: "POST",
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ title: movie.Title })
+      },
+      // Approach 3: Send movie title in request body with different field name
+      {
+        url: `${API_URL}/users/${user.Username}/movies`,
+        method: "POST",
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ movie: movie.Title })
+      },
+      // Approach 4: Try with movie title in URL path
+      {
+        url: `${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movie.Title)}`,
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      },
+      // Approach 5: Try with movie title as query parameter
+      {
+        url: `${API_URL}/users/${user.Username}/movies?title=${encodeURIComponent(movie.Title)}`,
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      }
     ];
     
-    // Try each endpoint until one works
-    const tryEndpoint = async (index) => {
-      if (index >= endpoints.length) {
-        console.error("All endpoints failed for adding favorite");
+    // Try each approach until one works
+    const tryApproach = async (index) => {
+      if (index >= approaches.length) {
+        console.error("All approaches failed for adding favorite");
         return;
       }
       
       try {
-        const response = await fetch(endpoints[index], {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` }
+        const approach = approaches[index];
+        console.log(`Trying approach ${index + 1}:`, approach);
+        
+        const response = await fetch(approach.url, {
+          method: approach.method,
+          headers: approach.headers,
+          body: approach.body
         });
         
         if (response.ok) {
-          console.log(`Success with endpoint ${index + 1}:`, endpoints[index]);
+          console.log(`Success with approach ${index + 1}:`, approach.url);
           if (onFavoriteChange) onFavoriteChange();
         } else {
-          console.log(`Endpoint ${index + 1} failed (${response.status}):`, endpoints[index]);
-          // Try next endpoint
-          tryEndpoint(index + 1);
+          console.log(`Approach ${index + 1} failed (${response.status}):`, approach.url);
+          // Try next approach
+          tryApproach(index + 1);
         }
       } catch (error) {
-        console.log(`Endpoint ${index + 1} error:`, error);
-        // Try next endpoint
-        tryEndpoint(index + 1);
+        console.log(`Approach ${index + 1} error:`, error);
+        // Try next approach
+        tryApproach(index + 1);
       }
     };
     
-    tryEndpoint(0);
+    tryApproach(0);
   };
 
   const handleRemoveFavorite = () => {
