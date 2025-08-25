@@ -22,9 +22,14 @@ export const MovieCard = ({
       return;
     }
     
-    fetch(`${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movieId)}`, {
+    // Try sending the movie title in the request body
+    fetch(`${API_URL}/users/${user.Username}/movies`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ movieTitle: movieId })
     })
       .then(async (res) => {
         if (!res.ok) throw new Error(`Failed to add favorite (${res.status})`);
@@ -44,9 +49,14 @@ export const MovieCard = ({
       return;
     }
     
-    fetch(`${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movieId)}`, {
+    // Try sending the movie title in the request body for deletion
+    fetch(`${API_URL}/users/${user.Username}/movies`, {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ movieTitle: movieId })
     })
       .then(async (res) => {
         if (!res.ok) throw new Error(`Failed to remove favorite (${res.status})`);
