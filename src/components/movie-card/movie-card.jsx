@@ -14,31 +14,65 @@ export const MovieCard = ({
   onFavoriteChange
 }) => {
   const handleAddFavorite = () => {
-    fetch(`${API_URL}/users/${user.Username}/movies/${movie._id}`, {
-      method: "PATCH",
+    // Use either _id or id, whichever is available
+    const movieId = movie._id || movie.id;
+    
+    if (!movieId) {
+      console.error("No movie ID found:", movie);
+      return;
+    }
+    
+    fetch(`${API_URL}/users/${user.Username}/movies/${movieId}`, {
+      method: "POST",
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => res.json())
-      .then(() => {
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`Failed to add favorite (${res.status})`);
+        // Some endpoints return 204 No Content; safely consume if present
+        try { await res.json(); } catch (_) {}
         if (onFavoriteChange) onFavoriteChange();
-      });
+      })
+      .catch(err => console.error("Add favorite error:", err));
   };
 
   const handleRemoveFavorite = () => {
-    fetch(`${API_URL}/users/${user.Username}/${movie._id}`, {
+    // Use either _id or id, whichever is available
+    const movieId = movie._id || movie.id;
+    
+    if (!movieId) {
+      console.error("No movie ID found:", movie);
+      return;
+    }
+    
+    fetch(`${API_URL}/users/${user.Username}/movies/${movieId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => res.json())
-      .then(() => {
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`Failed to remove favorite (${res.status})`);
+        try { await res.json(); } catch (_) {}
         if (onFavoriteChange) onFavoriteChange();
-      });
+      })
+      .catch(err => console.error("Remove favorite error:", err));
   };
 
+  // Define the image path correctly
+  const imagePath = movie.ImagePath || "https://via.placeholder.com/300x450?text=No+Image";
+
   return (
-    <Card className="movie-card">
+    <Card className="movie-card h-100">
       <Link to={`/movies/${movie.Title}`}>
-        <Card.Img variant="top" src={movie.image} />
+        <Card.Img 
+          variant="top" 
+          src={imagePath} 
+          alt={movie.Title}
+          style={{ height: "300px", width: "168px"}}
+          onError={(e) => {
+            console.log("Image failed to load:", imagePath);
+            e.target.onerror = null;
+            e.target.src = "https://via.placeholder.com/300x450?text=Image+Not+Found";
+          }} 
+        />
       </Link>
       <Card.Body>
         <Card.Title>{movie.Title}</Card.Title>
@@ -68,14 +102,16 @@ export const MovieCard = ({
   );
 };
 
+// Fix PropTypes to match your actual API response structure
 MovieCard.propTypes = {
   movie: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
+    _id: PropTypes.string,
+    id: PropTypes.string,
     Title: PropTypes.string.isRequired,
-    image: PropTypes.string.isRequired,
-    director: PropTypes.shape({
-      name: PropTypes.string.isRequired,
-    }).isRequired,
+    ImagePath: PropTypes.string, // Changed from image to ImagePath
+    Director: PropTypes.shape({
+      Name: PropTypes.string.isRequired,
+    }),
   }).isRequired,
   user: PropTypes.object,
   token: PropTypes.string,
