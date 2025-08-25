@@ -29,8 +29,16 @@ export const MovieCard = ({
           const searchResult = await searchResponse.json();
           console.log("Search result:", searchResult);
           
-          // If we found the movie with an ID, use that
-          if (searchResult && searchResult._id) {
+          // Handle array result - find the specific movie
+          if (Array.isArray(searchResult)) {
+            const foundMovie = searchResult.find(m => m.Title === movie.Title);
+            if (foundMovie && foundMovie._id) {
+              console.log("Found movie with ID:", foundMovie._id);
+              addFavoriteWithId(foundMovie._id);
+              return;
+            }
+          } else if (searchResult && searchResult._id) {
+            // Handle single object result
             console.log("Found movie with ID:", searchResult._id);
             addFavoriteWithId(searchResult._id);
             return;
@@ -66,52 +74,74 @@ export const MovieCard = ({
       }
     };
     
-    const tryOriginalApproaches = () => {
-      // Try different approaches
-      const approaches = [
-        // Approach 1: Send movie title in request body
-        {
-          url: `${API_URL}/users/${user.Username}/movies`,
-          method: "POST",
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ movieTitle: movie.Title })
-        },
-        // Approach 2: Send movie title in request body with different field name
-        {
-          url: `${API_URL}/users/${user.Username}/movies`,
-          method: "POST",
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ title: movie.Title })
-        },
-        // Approach 3: Send movie title in request body with different field name
-        {
-          url: `${API_URL}/users/${user.Username}/movies`,
-          method: "POST",
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ movie: movie.Title })
-        },
-        // Approach 4: Try with movie title in URL path
-        {
-          url: `${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movie.Title)}`,
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` }
-        },
-        // Approach 5: Try with movie title as query parameter
-        {
-          url: `${API_URL}/users/${user.Username}/movies?title=${encodeURIComponent(movie.Title)}`,
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      ];
+         const tryOriginalApproaches = () => {
+       // Try different approaches
+       const approaches = [
+         // Approach 1: Send movie title in request body
+         {
+           url: `${API_URL}/users/${user.Username}/movies`,
+           method: "POST",
+           headers: { 
+             Authorization: `Bearer ${token}`,
+             "Content-Type": "application/json"
+           },
+           body: JSON.stringify({ movieTitle: movie.Title })
+         },
+         // Approach 2: Send movie title in request body with different field name
+         {
+           url: `${API_URL}/users/${user.Username}/movies`,
+           method: "POST",
+           headers: { 
+             Authorization: `Bearer ${token}`,
+             "Content-Type": "application/json"
+           },
+           body: JSON.stringify({ title: movie.Title })
+         },
+         // Approach 3: Send movie title in request body with different field name
+         {
+           url: `${API_URL}/users/${user.Username}/movies`,
+           method: "POST",
+           headers: { 
+             Authorization: `Bearer ${token}`,
+             "Content-Type": "application/json"
+           },
+           body: JSON.stringify({ movie: movie.Title })
+         },
+         // Approach 4: Try with movie title in URL path
+         {
+           url: `${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movie.Title)}`,
+           method: "POST",
+           headers: { Authorization: `Bearer ${token}` }
+         },
+         // Approach 5: Try with movie title as query parameter
+         {
+           url: `${API_URL}/users/${user.Username}/movies?title=${encodeURIComponent(movie.Title)}`,
+           method: "POST",
+           headers: { Authorization: `Bearer ${token}` }
+         },
+         // Approach 6: Try different endpoint structure
+         {
+           url: `${API_URL}/users/${user.Username}/favorites`,
+           method: "POST",
+           headers: { 
+             Authorization: `Bearer ${token}`,
+             "Content-Type": "application/json"
+           },
+           body: JSON.stringify({ movieTitle: movie.Title })
+         },
+         // Approach 7: Try with PATCH method
+         {
+           url: `${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movie.Title)}`,
+           method: "PATCH",
+           headers: { Authorization: `Bearer ${token}` }
+         },
+         // Approach 8: Try with PUT method
+         {
+           url: `${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movie.Title)}`,
+           method: "PUT",
+           headers: { Authorization: `Bearer ${token}` }
+         }
+       ];
       
       // Try each approach until one works
       const tryApproach = async (index) => {
