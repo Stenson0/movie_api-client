@@ -49,7 +49,8 @@ export const MainView = () => {
     );
 
     // Check if a movie is in user's favorites
-    const isFavoriteMovie = (movieId) => {
+    const isFavoriteMovie = (movie) => {
+        const movieId = movie._id || movie.id;
         return user && user.FavoriteMovies && user.FavoriteMovies.includes(movieId);
     };
 
@@ -142,12 +143,12 @@ export const MainView = () => {
                       <Col>No movies found</Col>
                     ) : (
                       filteredMovies.map((movie) => (
-                        <Col className="mb-4" key={movie._id} md={3}>
+                        <Col className="mb-4" key={movie._id || movie.id} md={3}>
                           <MovieCard 
                             user={user} 
                             token={token} 
                             movie={movie} 
-                            isFavorite={isFavoriteMovie(movie._id)}
+                            isFavorite={isFavoriteMovie(movie)}
                             onFavoriteChange={handleFavoriteChange}
                           />
                         </Col>

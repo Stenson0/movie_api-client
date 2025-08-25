@@ -14,7 +14,15 @@ export const MovieCard = ({
   onFavoriteChange
 }) => {
   const handleAddFavorite = () => {
-    fetch(`${API_URL}/users/${user.Username}/movies/${movie._id}`, {
+    // Use either _id or id, whichever is available
+    const movieId = movie._id || movie.id;
+    
+    if (!movieId) {
+      console.error("No movie ID found:", movie);
+      return;
+    }
+    
+    fetch(`${API_URL}/users/${user.Username}/movies/${movieId}`, {
       method: "PATCH",
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -25,7 +33,15 @@ export const MovieCard = ({
   };
 
   const handleRemoveFavorite = () => {
-    fetch(`${API_URL}/users/${user.Username}/${movie._id}`, {
+    // Use either _id or id, whichever is available
+    const movieId = movie._id || movie.id;
+    
+    if (!movieId) {
+      console.error("No movie ID found:", movie);
+      return;
+    }
+    
+    fetch(`${API_URL}/users/${user.Username}/${movieId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -84,7 +100,8 @@ export const MovieCard = ({
 // Fix PropTypes to match your actual API response structure
 MovieCard.propTypes = {
   movie: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
+    _id: PropTypes.string,
+    id: PropTypes.string,
     Title: PropTypes.string.isRequired,
     ImagePath: PropTypes.string, // Changed from image to ImagePath
     Director: PropTypes.shape({

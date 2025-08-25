@@ -73,9 +73,10 @@ export const ProfileView = ({ user, token, onLogout, movies }) => {
     };
 
     // Get favorite movies
-    const favoriteMovies = movies.filter(movie => 
-        userInfo && userInfo.FavoriteMovies && userInfo.FavoriteMovies.includes(movie._id)
-    );
+    const favoriteMovies = movies.filter(movie => {
+        const movieId = movie._id || movie.id;
+        return userInfo && userInfo.FavoriteMovies && userInfo.FavoriteMovies.includes(movieId);
+    });
 
     // Show loading state while fetching user data
     if (!userInfo) return <div>Loading user information...</div>;
@@ -143,7 +144,7 @@ export const ProfileView = ({ user, token, onLogout, movies }) => {
                                 <Col>You haven't added any movies to your favorites yet.</Col>
                             ) : (
                                 favoriteMovies.map(movie => (
-                                    <Col md={4} key={movie._id} className="mb-3">
+                                    <Col md={4} key={movie._id || movie.id} className="mb-3">
                                         <MovieCard
                                             movie={movie}
                                             user={user}
