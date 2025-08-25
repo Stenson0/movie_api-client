@@ -17,85 +17,138 @@ export const MovieCard = ({
     console.log("Full movie object:", movie);
     console.log("Available properties:", Object.keys(movie));
     
-    // Try different approaches
-    const approaches = [
-      // Approach 1: Send movie title in request body
-      {
-        url: `${API_URL}/users/${user.Username}/movies`,
-        method: "POST",
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ movieTitle: movie.Title })
-      },
-      // Approach 2: Send movie title in request body with different field name
-      {
-        url: `${API_URL}/users/${user.Username}/movies`,
-        method: "POST",
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ title: movie.Title })
-      },
-      // Approach 3: Send movie title in request body with different field name
-      {
-        url: `${API_URL}/users/${user.Username}/movies`,
-        method: "POST",
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ movie: movie.Title })
-      },
-      // Approach 4: Try with movie title in URL path
-      {
-        url: `${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movie.Title)}`,
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` }
-      },
-      // Approach 5: Try with movie title as query parameter
-      {
-        url: `${API_URL}/users/${user.Username}/movies?title=${encodeURIComponent(movie.Title)}`,
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    ];
-    
-    // Try each approach until one works
-    const tryApproach = async (index) => {
-      if (index >= approaches.length) {
-        console.error("All approaches failed for adding favorite");
-        return;
-      }
-      
+    // First, let's try to get a proper movie ID by searching for the movie
+    const searchForMovie = async () => {
       try {
-        const approach = approaches[index];
-        console.log(`Trying approach ${index + 1}:`, approach);
-        
-        const response = await fetch(approach.url, {
-          method: approach.method,
-          headers: approach.headers,
-          body: approach.body
+        // Try to get movie details by title
+        const searchResponse = await fetch(`${API_URL}/movies?title=${encodeURIComponent(movie.Title)}`, {
+          headers: { Authorization: `Bearer ${token}` }
         });
         
-        if (response.ok) {
-          console.log(`Success with approach ${index + 1}:`, approach.url);
-          if (onFavoriteChange) onFavoriteChange();
-        } else {
-          console.log(`Approach ${index + 1} failed (${response.status}):`, approach.url);
-          // Try next approach
-          tryApproach(index + 1);
+        if (searchResponse.ok) {
+          const searchResult = await searchResponse.json();
+          console.log("Search result:", searchResult);
+          
+          // If we found the movie with an ID, use that
+          if (searchResult && searchResult._id) {
+            console.log("Found movie with ID:", searchResult._id);
+            addFavoriteWithId(searchResult._id);
+            return;
+          }
         }
+        
+        // If search didn't work, try the original approaches
+        tryOriginalApproaches();
+        
       } catch (error) {
-        console.log(`Approach ${index + 1} error:`, error);
-        // Try next approach
-        tryApproach(index + 1);
+        console.log("Search failed, trying original approaches");
+        tryOriginalApproaches();
       }
     };
     
-    tryApproach(0);
+    const addFavoriteWithId = async (movieId) => {
+      try {
+        const response = await fetch(`${API_URL}/users/${user.Username}/movies/${movieId}`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          console.log("Successfully added favorite with ID:", movieId);
+          if (onFavoriteChange) onFavoriteChange();
+        } else {
+          console.log("Failed to add favorite with ID:", response.status);
+          tryOriginalApproaches();
+        }
+      } catch (error) {
+        console.log("Error adding favorite with ID:", error);
+        tryOriginalApproaches();
+      }
+    };
+    
+    const tryOriginalApproaches = () => {
+      // Try different approaches
+      const approaches = [
+        // Approach 1: Send movie title in request body
+        {
+          url: `${API_URL}/users/${user.Username}/movies`,
+          method: "POST",
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ movieTitle: movie.Title })
+        },
+        // Approach 2: Send movie title in request body with different field name
+        {
+          url: `${API_URL}/users/${user.Username}/movies`,
+          method: "POST",
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ title: movie.Title })
+        },
+        // Approach 3: Send movie title in request body with different field name
+        {
+          url: `${API_URL}/users/${user.Username}/movies`,
+          method: "POST",
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ movie: movie.Title })
+        },
+        // Approach 4: Try with movie title in URL path
+        {
+          url: `${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movie.Title)}`,
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` }
+        },
+        // Approach 5: Try with movie title as query parameter
+        {
+          url: `${API_URL}/users/${user.Username}/movies?title=${encodeURIComponent(movie.Title)}`,
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      ];
+      
+      // Try each approach until one works
+      const tryApproach = async (index) => {
+        if (index >= approaches.length) {
+          console.error("All approaches failed for adding favorite");
+          return;
+        }
+        
+        try {
+          const approach = approaches[index];
+          console.log(`Trying approach ${index + 1}:`, approach);
+          
+          const response = await fetch(approach.url, {
+            method: approach.method,
+            headers: approach.headers,
+            body: approach.body
+          });
+          
+          if (response.ok) {
+            console.log(`Success with approach ${index + 1}:`, approach.url);
+            if (onFavoriteChange) onFavoriteChange();
+          } else {
+            console.log(`Approach ${index + 1} failed (${response.status}):`, approach.url);
+            // Try next approach
+            tryApproach(index + 1);
+          }
+        } catch (error) {
+          console.log(`Approach ${index + 1} error:`, error);
+          // Try next approach
+          tryApproach(index + 1);
+        }
+      };
+      
+      tryApproach(0);
+    };
+    
+    searchForMovie();
   };
 
   const handleRemoveFavorite = () => {
