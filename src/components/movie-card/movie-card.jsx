@@ -22,22 +22,43 @@ export const MovieCard = ({
       return;
     }
     
-    // Try sending the movie title in the request body
-    fetch(`${API_URL}/users/${user.Username}/movies`, {
-      method: "POST",
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ movieTitle: movieId })
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`Failed to add favorite (${res.status})`);
-        // Some endpoints return 204 No Content; safely consume if present
-        try { await res.json(); } catch (_) {}
-        if (onFavoriteChange) onFavoriteChange();
-      })
-      .catch(err => console.error("Add favorite error:", err));
+    // Try different endpoint patterns
+    const endpoints = [
+      `${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movieId)}`,
+      `${API_URL}/users/${user.Username}/movies?title=${encodeURIComponent(movieId)}`,
+      `${API_URL}/users/${user.Username}/favorites/${encodeURIComponent(movieId)}`,
+      `${API_URL}/users/${user.Username}/favorites?title=${encodeURIComponent(movieId)}`
+    ];
+    
+    // Try each endpoint until one works
+    const tryEndpoint = async (index) => {
+      if (index >= endpoints.length) {
+        console.error("All endpoints failed for adding favorite");
+        return;
+      }
+      
+      try {
+        const response = await fetch(endpoints[index], {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          console.log(`Success with endpoint ${index + 1}:`, endpoints[index]);
+          if (onFavoriteChange) onFavoriteChange();
+        } else {
+          console.log(`Endpoint ${index + 1} failed (${response.status}):`, endpoints[index]);
+          // Try next endpoint
+          tryEndpoint(index + 1);
+        }
+      } catch (error) {
+        console.log(`Endpoint ${index + 1} error:`, error);
+        // Try next endpoint
+        tryEndpoint(index + 1);
+      }
+    };
+    
+    tryEndpoint(0);
   };
 
   const handleRemoveFavorite = () => {
@@ -49,21 +70,43 @@ export const MovieCard = ({
       return;
     }
     
-    // Try sending the movie title in the request body for deletion
-    fetch(`${API_URL}/users/${user.Username}/movies`, {
-      method: "DELETE",
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ movieTitle: movieId })
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`Failed to remove favorite (${res.status})`);
-        try { await res.json(); } catch (_) {}
-        if (onFavoriteChange) onFavoriteChange();
-      })
-      .catch(err => console.error("Remove favorite error:", err));
+    // Try different endpoint patterns for deletion
+    const deleteEndpoints = [
+      `${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movieId)}`,
+      `${API_URL}/users/${user.Username}/movies?title=${encodeURIComponent(movieId)}`,
+      `${API_URL}/users/${user.Username}/favorites/${encodeURIComponent(movieId)}`,
+      `${API_URL}/users/${user.Username}/favorites?title=${encodeURIComponent(movieId)}`
+    ];
+    
+    // Try each endpoint until one works
+    const tryDeleteEndpoint = async (index) => {
+      if (index >= deleteEndpoints.length) {
+        console.error("All endpoints failed for removing favorite");
+        return;
+      }
+      
+      try {
+        const response = await fetch(deleteEndpoints[index], {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          console.log(`Success with delete endpoint ${index + 1}:`, deleteEndpoints[index]);
+          if (onFavoriteChange) onFavoriteChange();
+        } else {
+          console.log(`Delete endpoint ${index + 1} failed (${response.status}):`, deleteEndpoints[index]);
+          // Try next endpoint
+          tryDeleteEndpoint(index + 1);
+        }
+      } catch (error) {
+        console.log(`Delete endpoint ${index + 1} error:`, error);
+        // Try next endpoint
+        tryDeleteEndpoint(index + 1);
+      }
+    };
+    
+    tryDeleteEndpoint(0);
   };
 
   // Define the image path correctly
