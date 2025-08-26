@@ -29,6 +29,10 @@ export const MovieCard = ({
   };
 
   const handleRemoveFavorite = () => {
+    console.log("Removing favorite for movie:", movie.Title);
+    console.log("User:", user.Username);
+    console.log("Token:", token);
+    
     // Use PATCH method with action: "remove" in request body (this was the working approach)
     fetch(`${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movie.Title)}`, {
       method: "PATCH",
@@ -39,11 +43,19 @@ export const MovieCard = ({
       body: JSON.stringify({ action: "remove" })
     })
       .then(async (res) => {
+        console.log("Remove favorite response status:", res.status);
         if (!res.ok) throw new Error(`Failed to remove favorite (${res.status})`);
-        try { await res.json(); } catch (_) {}
+        try { 
+          const responseData = await res.json();
+          console.log("Remove favorite response data:", responseData);
+        } catch (_) {}
+        console.log("Calling onFavoriteChange callback");
         if (onFavoriteChange) onFavoriteChange();
       })
-      .catch(err => console.error("Remove favorite error:", err));
+      .catch(err => {
+        console.error("Remove favorite error:", err);
+        console.error("Error details:", err.message);
+      });
   };
 
   // Define the image path correctly
