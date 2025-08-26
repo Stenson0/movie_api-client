@@ -4,7 +4,7 @@ import { MovieCard } from "../movie-card/movie-card";
 
 const API_URL = "https://mymovie-api-cc1cba8fc12b.herokuapp.com";
 
-export const ProfileView = ({ user, token, onLogout, movies }) => {
+export const ProfileView = ({ user, token, onLogout, movies, onFavoriteChange }) => {
     const [userInfo, setUserInfo] = useState(user);
     const [form, setForm] = useState({
         Username: user.Username,
@@ -142,8 +142,7 @@ export const ProfileView = ({ user, token, onLogout, movies }) => {
                                             user={user}
                                             token={token}
                                             isFavorite={true}
-                                            onFavoriteChange={() => {
-                                            }}
+                                            onFavoriteChange={onFavoriteChange}
                                         />
                                     </Col>
                                 ))

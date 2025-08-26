@@ -168,6 +168,7 @@ export const MainView = () => {
                         token={token}
                         movies={movies}
                         onLogout={handleLogout}
+                        onFavoriteChange={handleFavoriteChange}
                     />
                 ) : (
                     <Navigate to="/login" replace />
