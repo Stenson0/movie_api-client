@@ -15,104 +15,110 @@ export const MovieCard = ({
 }) => {
     const handleAddFavorite = () => {
     console.log("Adding favorite for movie:", movie.Title);
-    console.log("User:", user.Username);
-    console.log("Token:", token);
     
-    // Use PATCH method with movie title in URL path (this was the working approach)
-    fetch(`${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movie.Title)}`, {
-      method: "PATCH",
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(async (res) => {
-        console.log("Add favorite response status:", res.status);
-        if (!res.ok) throw new Error(`Failed to add favorite (${res.status})`);
-        // Some endpoints return 204 No Content; safely consume if present
-        try { 
-          const responseData = await res.json();
-          console.log("Add favorite response data:", responseData);
-          console.log("FavoriteMovies array after adding:", responseData.FavoriteMovies);
-        } catch (_) {}
-        console.log("Calling onFavoriteChange callback");
-        if (onFavoriteChange) onFavoriteChange();
-      })
-      .catch(err => {
-        console.error("Add favorite error:", err);
-        console.error("Error details:", err.message);
-      });
-  };
-
-  const handleRemoveFavorite = () => {
-    console.log("Removing favorite for movie:", movie.Title);
-    console.log("User:", user.Username);
-    console.log("Token:", token);
-    
-    // Try different approaches for removing favorites
-    const removeApproaches = [
-      // Approach 1: PATCH with action: "remove"
-      {
-        url: `${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movie.Title)}`,
-        method: "PATCH",
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ action: "remove" })
-      },
-      // Approach 2: PATCH with movie title in body
-      {
-        url: `${API_URL}/users/${user.Username}/movies`,
-        method: "PATCH",
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ movieTitle: movie.Title, action: "remove" })
-      },
-      // Approach 3: DELETE with movie title
-      {
-        url: `${API_URL}/users/${user.Username}/movies/${encodeURIComponent(movie.Title)}`,
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    ];
-    
-    // Try each approach until one works
-    const tryRemoveApproach = async (index) => {
-      if (index >= removeApproaches.length) {
-        console.error("All remove approaches failed");
-        return;
-      }
-      
+    // First, try to get the movie ID by searching
+    const getMovieIdAndAdd = async () => {
       try {
-        const approach = removeApproaches[index];
-        console.log(`Trying remove approach ${index + 1}:`, approach);
-        
-        const response = await fetch(approach.url, {
-          method: approach.method,
-          headers: approach.headers,
-          body: approach.body
+        // Search for the movie to get its ID
+        const searchResponse = await fetch(`${API_URL}/movies?title=${encodeURIComponent(movie.Title)}`, {
+          headers: { Authorization: `Bearer ${token}` }
         });
         
-        console.log(`Remove approach ${index + 1} response status:`, response.status);
-        
-        if (response.ok) {
-          const responseData = await response.json();
-          console.log(`Success with remove approach ${index + 1}:`, approach.url);
-          console.log("Updated FavoriteMovies array:", responseData.FavoriteMovies);
-          if (onFavoriteChange) onFavoriteChange();
-        } else {
-          console.log(`Remove approach ${index + 1} failed (${response.status}):`, approach.url);
-          // Try next approach
-          tryRemoveApproach(index + 1);
+        if (searchResponse.ok) {
+          const searchResult = await searchResponse.json();
+          console.log("Search result for adding:", searchResult);
+          
+          // Find the specific movie
+          let movieId = null;
+          if (Array.isArray(searchResult)) {
+            const foundMovie = searchResult.find(m => m.Title === movie.Title);
+            if (foundMovie && foundMovie._id) {
+              movieId = foundMovie._id;
+              console.log("Found movie ID for adding:", movieId);
+            }
+          }
+          
+          // Try to add using movie ID if found, otherwise use title
+          const identifier = movieId || movie.Title;
+          console.log("Using identifier for adding:", identifier);
+          
+          const addResponse = await fetch(`${API_URL}/users/${user.Username}/movies/${encodeURIComponent(identifier)}`, {
+            method: "PATCH",
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          console.log("Add favorite response status:", addResponse.status);
+          if (addResponse.ok) {
+            const responseData = await addResponse.json();
+            console.log("Add favorite response data:", responseData);
+            console.log("FavoriteMovies array after adding:", responseData.FavoriteMovies);
+            if (onFavoriteChange) onFavoriteChange();
+          } else {
+            console.error("Failed to add favorite:", addResponse.status);
+          }
         }
       } catch (error) {
-        console.log(`Remove approach ${index + 1} error:`, error);
-        // Try next approach
-        tryRemoveApproach(index + 1);
+        console.error("Error in getMovieIdAndAdd:", error);
       }
     };
     
-        tryRemoveApproach(0);
+    getMovieIdAndAdd();
+  };
+
+    const handleRemoveFavorite = () => {
+    console.log("Removing favorite for movie:", movie.Title);
+    
+    // First, try to get the movie ID by searching
+    const getMovieIdAndRemove = async () => {
+      try {
+        // Search for the movie to get its ID
+        const searchResponse = await fetch(`${API_URL}/movies?title=${encodeURIComponent(movie.Title)}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (searchResponse.ok) {
+          const searchResult = await searchResponse.json();
+          console.log("Search result for removing:", searchResult);
+          
+          // Find the specific movie
+          let movieId = null;
+          if (Array.isArray(searchResult)) {
+            const foundMovie = searchResult.find(m => m.Title === movie.Title);
+            if (foundMovie && foundMovie._id) {
+              movieId = foundMovie._id;
+              console.log("Found movie ID for removing:", movieId);
+            }
+          }
+          
+          // Try to remove using movie ID if found, otherwise use title
+          const identifier = movieId || movie.Title;
+          console.log("Using identifier for removing:", identifier);
+          
+          const removeResponse = await fetch(`${API_URL}/users/${user.Username}/movies/${encodeURIComponent(identifier)}`, {
+            method: "PATCH",
+            headers: { 
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ action: "remove" })
+          });
+          
+          console.log("Remove favorite response status:", removeResponse.status);
+          if (removeResponse.ok) {
+            const responseData = await removeResponse.json();
+            console.log("Remove favorite response data:", responseData);
+            console.log("Updated FavoriteMovies array:", responseData.FavoriteMovies);
+            if (onFavoriteChange) onFavoriteChange();
+          } else {
+            console.error("Failed to remove favorite:", removeResponse.status);
+          }
+        }
+      } catch (error) {
+        console.error("Error in getMovieIdAndRemove:", error);
+      }
+    };
+    
+    getMovieIdAndRemove();
   };
 
   // Define the image path correctly
