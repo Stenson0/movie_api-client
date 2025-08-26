@@ -28,6 +28,8 @@ export const MainView = () => {
         })
         .then(response => response.json())
         .then(movies => {
+            console.log("Movies loaded in main view:", movies);
+            console.log("Number of movies:", movies.length);
             setMovies(movies)})
         .catch(error => {
             console.error("Error fetching movies:", error);
@@ -61,6 +63,8 @@ export const MainView = () => {
         })
         .then(response => response.json())
         .then(userData => {
+            console.log("User data updated in main view:", userData);
+            console.log("User favorites:", userData.FavoriteMovies);
             setUser(userData);
             localStorage.setItem("user", JSON.stringify(userData));
         });
