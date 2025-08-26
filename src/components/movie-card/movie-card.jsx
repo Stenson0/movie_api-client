@@ -48,6 +48,9 @@ export const MovieCard = ({
         try { 
           const responseData = await res.json();
           console.log("Remove favorite response data:", responseData);
+          console.log("FavoriteMovies array:", responseData.FavoriteMovies);
+          console.log("Looking for movie title:", movie.Title);
+          console.log("Is movie in favorites?", responseData.FavoriteMovies.includes(movie.Title));
         } catch (_) {}
         console.log("Calling onFavoriteChange callback");
         if (onFavoriteChange) onFavoriteChange();
