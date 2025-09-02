@@ -4,31 +4,25 @@ import { MovieCard } from "../movie-card/movie-card";
 
 const API_URL = "https://mymovie-api-cc1cba8fc12b.herokuapp.com";
 
-export const ProfileView = ({ user, token, onLogout, movies }) => {
-    const [userInfo, setUserInfo] = useState(null);
+export const ProfileView = ({ user, token, onLogout, movies, onFavoriteChange }) => {
+    const [userInfo, setUserInfo] = useState(user);
     const [form, setForm] = useState({
-        Username: "",
+        Username: user.Username,
         Password: "",
-        Email: "",
-        Birthday: ""
+        Email: user.Email,
+        Birthday: user.Birthday ? user.Birthday.slice(0, 10) : ""
     });
 
+    // Update userInfo when user prop changes (from main view)
     useEffect(() => {
-        fetch(`${API_URL}/users`, {
-        headers: { Authorization: `Bearer ${token}` }
-        })
-        .then(res => res.json())
-        .then(users => {
-            const found = users.find(u => u.Username === user.Username);
-            setUserInfo(found);
-            setForm({
-            Username: found.Username,
+        setUserInfo(user);
+        setForm({
+            Username: user.Username,
             Password: "",
-            Email: found.Email,
-            Birthday: found.Birthday ? found.Birthday.slice(0, 10) : ""
-            });
+            Email: user.Email,
+            Birthday: user.Birthday ? user.Birthday.slice(0, 10) : ""
         });
-    }, [user, token]);
+    }, [user]);
 
     const handleChange = e => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -37,109 +31,127 @@ export const ProfileView = ({ user, token, onLogout, movies }) => {
     const handleUpdate = e => {
         e.preventDefault();
         fetch(`${API_URL}/users/${userInfo.Username}`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(form)
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify(form)
         })
         .then(res => res.json())
         .then(data => {
             alert("Profile updated!");
             setUserInfo(data);
+        })
+        .catch(err => {
+            console.error("Error updating user data:", err);
         });
     };
 
     const handleDeregister = () => {
         if (!window.confirm("Are you sure you want to delete your account?")) return;
+        
         fetch(`${API_URL}/users/${userInfo.Username}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
-        }).then(() => {
-        alert("Account deleted.");
-        onLogout();
-        });
-    };
-
-    const handleRemoveFavorite = (movieId) => {
-        fetch(`${API_URL}/users/${userInfo.Username}/movies/${movieId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
         })
-        .then(res => res.json())
-        .then(data => {
-            alert("Removed from favorites");
-            setUserInfo(data);
+        .then(() => {
+            alert("Account deleted successfully");
+            onLogout();
+        })
+        .catch(err => {
+            console.error("Error deleting account:", err);
         });
     };
 
-    if (!userInfo) return <div>Loading...</div>;
+    // Get favorite movies
+    const favoriteMovies = movies.filter(movie => {
+        const movieId = movie.Title;
+        return userInfo && userInfo.FavoriteMovies && userInfo.FavoriteMovies.includes(movieId);
+    });
 
-    favoriteMovies = movies.filter(m => 
-        user.FavoriteMovies.includes(m._id)
-    );
+    // Show loading state while fetching user data
+    if (!userInfo) return <div>Loading user information...</div>;
 
     return (
-        <Card>
-        <Card.Body>
-            <Card.Title>Profile</Card.Title>
-            <Form onSubmit={handleUpdate}>
-            <Form.Group>
-                <Form.Label>Username</Form.Label>
-                <Form.Control
-                name="Username"
-                value={form.Username}
-                onChange={handleChange}
-                required
-                />
-            </Form.Group>
-            <Form.Group>
-                <Form.Label>Password</Form.Label>
-                <Form.Control
-                name="Password"
-                type="password"
-                value={form.Password}
-                onChange={handleChange}
-                required
-                />
-            </Form.Group>
-            <Form.Group>
-                <Form.Label>Email</Form.Label>
-                <Form.Control
-                name="Email"
-                type="email"
-                value={form.Email}
-                onChange={handleChange}
-                required
-                />
-            </Form.Group>
-            <Form.Group>
-                <Form.Label>Birthday</Form.Label>
-                <Form.Control
-                name="Birthday"
-                type="date"
-                value={form.Birthday}
-                onChange={handleChange}
-                />
-            </Form.Group>
-            <Button type="submit" className="mt-2">Update</Button>
-            </Form>
-            <Button variant="danger" className="mt-3" onClick={handleDeregister}>
-            Deregister
-            </Button>
-            <hr />
-            <h5 className="mt-4">Favorite Movies</h5>
-            <Row>
-                <h4>Favorite Movies</h4>
-                {favoriteMovies?.map((movie) => (
-                    <Col sm={6} md={5} lg={4} xl={3} key={movie._id} className='my-3'>
-                    <MovieCard movie={movie} />
-                    </Col>
-                ))}
-            </Row>
-        </Card.Body>
-        </Card>
+        <Row>
+            <Col md={4}>
+                <Card className="mb-4">
+                    <Card.Body>
+                        <Card.Title>Your Profile</Card.Title>
+                        <Form onSubmit={handleUpdate}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Username</Form.Label>
+                                <Form.Control
+                                    name="Username"
+                                    value={form.Username}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Password</Form.Label>
+                                <Form.Control
+                                    name="Password"
+                                    type="password"
+                                    value={form.Password}
+                                    onChange={handleChange}
+                                    placeholder="Enter new password"
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Email</Form.Label>
+                                <Form.Control
+                                    name="Email"
+                                    type="email"
+                                    value={form.Email}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Birthday</Form.Label>
+                                <Form.Control
+                                    name="Birthday"
+                                    type="date"
+                                    value={form.Birthday}
+                                    onChange={handleChange}
+                                />
+                            </Form.Group>
+                            <Button type="submit" className="mb-3 w-100">Update Profile</Button>
+                            <Button variant="danger" onClick={handleDeregister} className="w-100">
+                                Delete Account
+                            </Button>
+                        </Form>
+                    </Card.Body>
+                </Card>
+            </Col>
+            <Col md={8}>
+                <Card>
+                    <Card.Body>
+                        <Card.Title>Your Favorite Movies</Card.Title>
+                        <Row>
+                            {favoriteMovies.length === 0 ? (
+                                <Col>You haven't added any movies to your favorites yet.</Col>
+                            ) : (
+                                favoriteMovies.map(movie => (
+                                    <Col md={4} key={movie.Title} className="mb-3">
+                                        <MovieCard
+                                            movie={movie}
+                                            user={user}
+                                            token={token}
+                                            isFavorite={true}
+                                            onFavoriteChange={onFavoriteChange}
+                                        />
+                                    </Col>
+                                ))
+                            )}
+                        </Row>
+                    </Card.Body>
+                </Card>
+            </Col>
+        </Row>
     );
 };
 
