@@ -32,33 +32,41 @@ export const MainView = () => {
         console.log("Token being used:", token);
         console.log("Token length:", token.length);
         
-        // Some APIs expect "Bearer " prefix, others don't - try without prefix
-        const authHeader = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+        // Try with "Bearer " prefix (this is the most common format)
+        const authHeader = `Bearer ${token}`;
         
         fetch("https://mymovie-api-cc1cba8fc12b.herokuapp.com/movies", {
             headers: { 
-                "Authorization": token, // Try without Bearer prefix
+                "Authorization": authHeader,
                 "Content-Type": "application/json"
             },
         })
         .then(response => {
             // Log response status to debug
-            console.log("API response status:", response.status, response.statusText);
+            console.log("API response status with Bearer prefix:", response.status, response.statusText);
             
-            if (!response.ok) {
-                // If token is expired or invalid, try logging in again
-                if (response.status === 401) {
-                    console.error("Authentication error: Token may be expired or invalid");
-                    setError("Authentication error: Please log in again");
-                    return null; // Return null instead of throwing to continue execution
-                }
-                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            if (response.ok) {
+                return response.json();
             }
-            return response.json();
+            
+            // If Bearer prefix fails, try without prefix
+            return fetch("https://mymovie-api-cc1cba8fc12b.herokuapp.com/movies", {
+                headers: { 
+                    "Authorization": token,
+                    "Content-Type": "application/json"
+                },
+            }).then(response2 => {
+                console.log("API response status without prefix:", response2.status, response2.statusText);
+                
+                if (response2.ok) {
+                    return response2.json();
+                }
+                
+                // If both fail, throw an error
+                throw new Error(`Server returned ${response2.status}: ${response2.statusText}`);
+            });
         })
         .then(data => {
-            if (!data) return; // Skip if we got null from previous step
-            
             console.log("Movies loaded in main view:", data);
             console.log("Number of movies:", data.length);
             setMovies(data);
