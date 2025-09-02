@@ -28,27 +28,46 @@ export const MainView = () => {
         setLoading(true);
         setError(null);
 
+        // Debug token format
+        console.log("Token being used:", token);
+        console.log("Token length:", token.length);
+        
+        // Some APIs expect "Bearer " prefix, others don't - try without prefix
+        const authHeader = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+        
         fetch("https://mymovie-api-cc1cba8fc12b.herokuapp.com/movies", {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { 
+                "Authorization": authHeader,
+                "Content-Type": "application/json"
+            },
         })
         .then(response => {
+            // Log response status to debug
+            console.log("API response status:", response.status, response.statusText);
+            
             if (!response.ok) {
-                // If we get a non-200 response, throw an error with the status
+                // If token is expired or invalid, try logging in again
+                if (response.status === 401) {
+                    console.error("Authentication error: Token may be expired or invalid");
+                    setError("Authentication error: Please log in again");
+                    return null; // Return null instead of throwing to continue execution
+                }
                 throw new Error(`Server returned ${response.status}: ${response.statusText}`);
             }
             return response.json();
         })
-        .then(movies => {
-            console.log("Movies loaded in main view:", movies);
-            console.log("Number of movies:", movies.length);
-            setMovies(movies);
+        .then(data => {
+            if (!data) return; // Skip if we got null from previous step
+            
+            console.log("Movies loaded in main view:", data);
+            console.log("Number of movies:", data.length);
+            setMovies(data);
             setLoading(false);
         })
         .catch(error => {
             console.error("Error fetching movies:", error);
             setError(error.message);
             setLoading(false);
-            // Set a default empty array to prevent the app from breaking
             setMovies([]);
         });
     }, [token]);

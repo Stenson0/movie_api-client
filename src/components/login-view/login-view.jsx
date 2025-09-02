@@ -28,10 +28,15 @@ export const LoginView = ({onLoggedIn}) => {
         .then((response) => response.json())
         .then((data) => {
           console.log("Login response: ", data);
-          if (data.user) {
+          if (data.user && data.token) {
+            // Log token before storing
+            console.log("Received token:", data.token);
+            console.log("Token type:", typeof data.token);
+            console.log("Token length:", data.token.length);
+            
             onLoggedIn(data.user, data.token);
           } else {
-            alert("No such user");
+            alert("No such user or missing token");
           }
         })
         .catch((e) => {
