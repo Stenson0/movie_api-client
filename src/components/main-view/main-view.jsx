@@ -19,20 +19,35 @@ export const MainView = () => {
     const [token, setToken] = useState(storedToken || null);
     const [movies, setMovies] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (!token) return;
 
+        setLoading(true);
+        setError(null);
+
         fetch("https://mymovie-api-cc1cba8fc12b.herokuapp.com/movies", {
             headers: { Authorization: `Bearer ${token}` },
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                // If we get a non-200 response, throw an error with the status
+                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(movies => {
             console.log("Movies loaded in main view:", movies);
             console.log("Number of movies:", movies.length);
-            setMovies(movies)})
+            setMovies(movies);
+            setLoading(false);
+        })
         .catch(error => {
             console.error("Error fetching movies:", error);
+            setError(error.message);
+            setLoading(false);
             // Set a default empty array to prevent the app from breaking
             setMovies([]);
         });
@@ -54,7 +69,7 @@ export const MainView = () => {
 
     // Check if a movie is in user's favorites
     const isFavoriteMovie = (movie) => {
-        const movieId = movie.Title;
+        const movieId = movie._id;
         return user && user.FavoriteMovies && user.FavoriteMovies.includes(movieId);
     };
 
@@ -63,12 +78,20 @@ export const MainView = () => {
         fetch(`https://mymovie-api-cc1cba8fc12b.herokuapp.com/users/${user.Username}`, {
             headers: { Authorization: `Bearer ${token}` },
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(userData => {
             console.log("User data updated in main view:", userData);
             console.log("User favorites:", userData.FavoriteMovies);
             setUser(userData);
             localStorage.setItem("user", JSON.stringify(userData));
+        })
+        .catch(error => {
+            console.error("Error updating user data:", error);
         });
     };
 
@@ -116,7 +139,9 @@ export const MainView = () => {
                 !user ? (
                     <Navigate to="/login" replace />
                 ) : movies.length === 0 ? (
-                    <Col>The list is empty!</Col>
+                    <Col>
+                        {loading ? "Loading..." : error ? `Error: ${error}` : "The list is empty!"}
+                    </Col>
                 ) : (
                     <Col md={8}>
                     <MovieView movies={movies} />
@@ -130,6 +155,10 @@ export const MainView = () => {
                 element={
                 !user ? (
                     <Navigate to="/login" replace />
+                ) : loading ? (
+                    <Col>Loading movies...</Col>
+                ) : error ? (
+                    <Col>Error: {error}</Col>
                 ) : movies.length === 0 ? (
                     <Col>The list is empty!</Col>
                 ) : (
@@ -149,7 +178,7 @@ export const MainView = () => {
                       <Col>No movies found</Col>
                     ) : (
                       filteredMovies.map((movie) => (
-                        <Col className="mb-4" key={movie.Title} md={3}>
+                        <Col className="mb-4" key={movie._id} md={3}>
                           <MovieCard 
                             user={user} 
                             token={token} 
