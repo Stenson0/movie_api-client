@@ -37,7 +37,7 @@ export const MainView = () => {
         
         fetch("https://mymovie-api-cc1cba8fc12b.herokuapp.com/movies", {
             headers: { 
-                "Authorization": authHeader,
+                "Authorization": token, // Try without Bearer prefix
                 "Content-Type": "application/json"
             },
         })

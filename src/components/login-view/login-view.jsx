@@ -25,9 +25,12 @@ export const LoginView = ({onLoggedIn}) => {
         },
         body: JSON.stringify(data)
       })
-        .then((response) => response.json())
+        .then((response) => {
+          console.log("Login response status:", response.status);
+          return response.json();
+        })
         .then((data) => {
-          console.log("Login response: ", data);
+          console.log("Login response data:", data);
           if (data.user && data.token) {
             // Log token before storing
             console.log("Received token:", data.token);
