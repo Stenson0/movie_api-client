@@ -33,6 +33,8 @@ export const MainView = () => {
             setMovies(movies)})
         .catch(error => {
             console.error("Error fetching movies:", error);
+            // Set a default empty array to prevent the app from breaking
+            setMovies([]);
         });
     }, [token]);
 
